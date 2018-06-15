@@ -185,35 +185,34 @@ HTTP status code `400`
 The AJV library supports the implementation of custom json schema keywords to address validation scenarios that json schema is not capable of addressing.
 
 ### isChildTermOf
-This custom keyword *evaluates if an ontology term is child of other*. This keyword is applied to an array of strings (url) and **passes validation if at least one of the terms in the array is child of the term defined in the schema**.
+This custom keyword *evaluates if an ontology term is child of other*. This keyword is applied to a string (url) and **passes validation if the term is a child of the term defined in the schema**.
 The keyword requires the **parent term** and the **ontology id**, both of which should exist in [OLS - Ontology Lookup Service](https://www.ebi.ac.uk/ols).
 
 This keyword works by doing an asynchronous call to the [OLS API](https://www.ebi.ac.uk/ols/api/) that will respond with the required information to know if a given term is child of another. 
-Being an async validation step, whenever used is a schema it should have the flag: `"$async": true`
+Being an async validation step, whenever used is a schema, the schema must have the flag: `"$async": true` in it's object root.
+
 #### Usage
 Schema:
 ```js
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$async": true,
-
-  (...)
-
-    "isChildTermOf": {
-      "parentTerm": "http://purl.obolibrary.org/obo/PATO_0000047",
-      "ontologyId": "pato"
+  "properties": {
+    "term": { 
+      "type": "string", 
+      "format": "uri",
+      "isChildTermOf": {
+        "parentTerm": "http://purl.obolibrary.org/obo/PATO_0000047",
+        "ontologyId": "pato"
+      } 
     }
+  }
 }
 ```
 JSON object:
 ```js
 {
-  "attributes": {
-    "sex": [{
-      "value": "female",
-      "terms":["http://purl.obolibrary.org/obo/PATO_0000383"]
-    }]
-  }
+  "term": "http://purl.obolibrary.org/obo/PATO_0000383"
 }
 ```
 
