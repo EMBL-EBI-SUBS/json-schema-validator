@@ -7,13 +7,14 @@ The validation is done using the [AJV](https://github.com/epoberezkin/ajv) libra
 
 Deployed for tests purposes on heroku: https://subs-json-schema-validator.herokuapp.com/validate
 
-:arrow_right: [Getting Started](README.md#getting-started)
+## Contents
+- [Getting Started](README.md#getting-started)
 
-:arrow_right: [Validator API](README.md#validator-api)
+- [Validation API](README.md#validation-api)
 
-:arrow_right: [Custom keywords](README.md#custom-keywords)
+- [Custom keywords](README.md#custom-keywords)
 
-:arrow_right: [License](README.md#license)
+- [License](README.md#license)
 
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
@@ -72,12 +73,12 @@ For development purposes using [nodemon](https://nodemon.io/) is useful. It relo
 nodemon src/server
 ```
 
-## Validator API
-The validator exposes one single endpoint that will accept POST requests. When running on you local machine it will look like: **http://localhost:3020/validate**.
+## Validation API
+This validator exposes one single endpoint that will accept POST requests. When running on you local machine it will look like: **http://localhost:3020/validate**.
 
 ### Usage
 The endpoint will expect the body to have the following structure:
-```json
+```js
 {
   "schema": {},
   "object": {}
@@ -87,60 +88,36 @@ Where the schema should be a valid json schema object to validate the submittabl
 
 **Example:**
 Sending a POST request with the following body:
-```json
+```js
 {
   "schema": {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Attributes",
-    "description": "USI submittable attributes schema.",
-
+    "$schema": "http://json-schema.org/draft-07/schema#"
+    
     "type": "object",
     "properties": {
-      "attributes": {
-        "type": "object",
-        "properties": {},
-        "patternProperties": {
-          "^.*$": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "properties": {
-                "value": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "units": {"type": "string"},
-                "terms": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "format": "uri"
-                  }
-                }
-              },
-              "required": ["value"]
-            }
-          }
-        }
+      "alias": {
+        "description": "A sample unique identifier in a submission.",
+        "type": "string"
+      },
+      "taxonId": {
+        "description": "The taxonomy id for the sample species.",
+        "type": "integer"
+      },
+      "taxon": {
+        "description": "The taxonomy name for the sample species.",
+        "type": "string"
+      },
+      "releaseDate": {
+        "description": "Date from which this sample is released publicly.",
+        "type": "string",
+        "format": "date"
       }
-    }
+    },  
+    "required": ["alias", "taxonId" ]
   },
   "object": {
-    "attributes": {
-      "age": [{
-        "value": "3",
-        "units": "days",
-        "terms":[
-          "http://purl.obolibrary.org/obo/UO_0000033"
-        ]
-      }],
-      "sex": [{
-        "value": "female",
-        "terms":[
-          "http://purl.obolibrary.org/obo/PATO_0000383"
-        ]
-      }]
-    }
+    "alias": "MA456",
+    "taxonId": 9606
   }
 }
 ```
@@ -150,7 +127,7 @@ HTTP status code `200`
 ```json
 []
 ```
-An invalid validation response will look like:
+An example of a validation response with errors:
 
 HTTP status code `200`
 ```json
@@ -217,7 +194,7 @@ JSON object:
 ```
 
 ### isValidTerm
-This custom keyword *evaluates if a given ontology term url exists in OLS*. This keyword is applied to a string (url) and **passes validation if the term exist in OLS**. It can be aplied to any string defined in the schema.
+This custom keyword *evaluates if a given ontology term url exists in OLS* ([Ontology Lookup Service](https://www.ebi.ac.uk/ols)). It is applied to a string (url) and **passes validation if the term exists in OLS**. It can be aplied to any string defined in the schema.
 
 This keyword works by doing an asynchronous call to the [OLS API](https://www.ebi.ac.uk/ols/api/) that will respond with the required information to determine if the term exists in OLS or not. 
 Being an async validation step, whenever used is a schema, the schema must have the flag: `"$async": true` in it's object root.
