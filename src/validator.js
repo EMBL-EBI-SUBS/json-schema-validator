@@ -38,7 +38,7 @@ function runValidation(inputSchema, inputObject) {
       }
     ).catch((err, errors) => {
       if (!(err instanceof Ajv.ValidationError)) {
-        logger.log("error", "An error ocurred while running the validation.")
+        logger.log("error", "An error ocurred while running the validation.");
         throw err;
       }
       logger.log("debug", ajv.errorsText(err.errors, {dataVar: inputObject.alias}));
