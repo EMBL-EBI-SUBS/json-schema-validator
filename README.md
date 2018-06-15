@@ -84,7 +84,7 @@ The endpoint will expect the body to have the following structure:
   "object": {}
 }
 ```
-Where the schema should be a valid json schema object to validate the submittable against.
+Where the schema should be a valid json schema to validate the object against.
 
 **Example:**
 Sending a POST request with the following body:
