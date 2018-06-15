@@ -159,7 +159,8 @@ HTTP status code `400`
 }
 ```
 ## Custom keywords
-The AJV library supports the implementation of custom json schema keywords to address validation scenarios that json schema is not capable of addressing.
+The AJV library supports the implementation of custom json schema keywords to address validation scenarios that go beyond what json schema can handle.
+This validator has two custom keywords implemented, `isChildTermOf` and `isValidTerm`.
 
 ### isChildTermOf
 This custom keyword *evaluates if an ontology term is child of other*. This keyword is applied to a string (url) and **passes validation if the term is a child of the term defined in the schema**.
