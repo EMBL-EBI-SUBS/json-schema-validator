@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const logger = require("./winston");
 const runValidation = require("./validator");
 const AppError = require("./model/application-error");
+const { check, validationResult } = require("express-validator/check");
+const validate = require("./validator-prototype");
 
 const argv = require("yargs").argv;
 const npid = require("npid");
@@ -30,11 +32,35 @@ app.use(function(err, req, res, next) {
   }
 });
 
+// -- Endpoint definition -- //
 app.post("/validate", (req, res) => {
+  validatePostRequest(req, res)
+});
+
+app.get("/validate", (req, res) => {
+  validateGetRequest(req, res);
+});
+
+app.post(
+  "/prototype", 
+  [
+    check("schemas", "Required and must be a non empty array.").isArray().not().isEmpty(),
+    check("rootSchemaId", "Required.").isURL(),
+    check("entity", "Required.").exists()
+  ], 
+  (req, res) => { prototypePostRequest(req, res); }
+);
+
+app.listen(port, () => {
+  logger.log("info", ` -- Started server on port ${port} --`);
+  if(argv.logPath) { logger.log("info", ` --> Log output: ${argv.logPath}`); }
+});
+
+function validatePostRequest(req, res) {
   logger.log("debug", "Received POST request.");
 
-  var inputSchema = req.body.schema;
-  var inputObject = req.body.object;
+  let inputSchema = req.body.schema;
+  let inputObject = req.body.object;
 
   if (inputSchema && inputObject) {
     runValidation(inputSchema, inputObject).then((output) => {
@@ -48,26 +74,37 @@ app.post("/validate", (req, res) => {
     logger.log("info", appError.error);
     res.status(400).send(appError);
   }
-});
+}
 
-app.get("/validate", (req, res) => {
+function validateGetRequest(req, res) {
   logger.log("silly", "Received GET request.");
-
   res.send({
-    message: "This is the USI JSON Schema Validator. Please POST to this endpoint the schema and object to validate structured as in bodyStructure. For more information and examples on how to use the validator see https://github.com/EMBL-EBI-SUBS/json-schema-validator",
+    message: "This is the Submissions JSON Schema Validator. Please POST to this endpoint the schema and object to validate structured as showed in bodyStructure.",
     bodyStructure: {
       schema: {},
       object: {}
-    }
+    },
+    repository: "https://github.com/EMBL-EBI-SUBS/json-schema-validator"
   });
-});
+}
 
-app.listen(port, () => {
-  logger.log("info", ` -- Started server on port ${port} --`);
-  if(argv.logPath) { logger.log("info", ` --> Log output: ${argv.logPath}`); }
-});
+function prototypePostRequest(req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.mapped() });
+  } else {
+    let errors;
+    try {
+      errors = validate(req.body.schemas, req.body.rootSchemaId, req.body.entity);
+      return res.json(errors || []);
+    } catch(err) {
+      logger.log("error", err);
+      return res.status(500).send(new AppError(err.message));
+    }
+  }
+}
 
-// -- For monitoring purposes --//
+// -- For monitoring purposes -- //
 const pidPath = argv.pidPath || "./server.pid";
 try {
   let pid = npid.create(pidPath);
@@ -83,8 +120,14 @@ process.on("SIGINT", () => {
   process.exit();
 });
 
-// Handles kill -USR1 pid event
+// Handles kill -USR1 pid event (monit)
 process.on("SIGUSR1", () => {
+  npid.remove(pidPath);
+  process.exit();
+});
+
+//Handles kill -USR2 pid event (nodemon)
+process.on("SIGUSR2", () => {
   npid.remove(pidPath);
   process.exit();
 });

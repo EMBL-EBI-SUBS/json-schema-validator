@@ -25,6 +25,7 @@
     "ajv": "^6.0.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "express-validator": "^5.2.0",
     "npid": "^0.4.0",
     "request": "^2.83.0",
     "update": "^0.7.4",
