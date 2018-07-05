@@ -33,50 +33,25 @@ app.use(function(err, req, res, next) {
 });
 
 // -- Endpoint definition -- //
-app.post("/validate", (req, res) => {
-  validatePostRequest(req, res)
-});
-
-app.get("/validate", (req, res) => {
-  validateGetRequest(req, res);
-});
-
-app.post(
-  "/prototype", 
-  [
-    check("schemas", "Required and must be a non empty array.").isArray().not().isEmpty(),
-    check("rootSchemaId", "Required.").isURL(),
-    check("entity", "Required.").exists()
-  ], 
-  (req, res) => { prototypePostRequest(req, res); }
-);
-
-app.listen(port, () => {
-  logger.log("info", ` -- Started server on port ${port} --`);
-  if(argv.logPath) { logger.log("info", ` --> Log output: ${argv.logPath}`); }
-});
-
-function validatePostRequest(req, res) {
-  logger.log("debug", "Received POST request.");
-
-  let inputSchema = req.body.schema;
-  let inputObject = req.body.object;
-
-  if (inputSchema && inputObject) {
-    runValidation(inputSchema, inputObject).then((output) => {
+app.post("/validate", [
+  check("schema", "Required.").exists(),
+  check("object", "Required.").exists()
+],(req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.mapped() });
+  } else {
+    logger.log("debug", "Received POST request.");
+    runValidation(req.body.schema, req.body.object).then((output) => {
       logger.log("silly", "Sent validation results.");
       res.status(200).send(output);
     }).catch((error) => {
       res.status(500).send(error);
     });
-  } else {
-    let appError = new AppError("Something is missing, both schema and object are required to execute validation.");
-    logger.log("info", appError.error);
-    res.status(400).send(appError);
   }
-}
+});
 
-function validateGetRequest(req, res) {
+app.get("/validate", (req, res) => {
   logger.log("silly", "Received GET request.");
   res.send({
     message: "This is the Submissions JSON Schema Validator. Please POST to this endpoint the schema and object to validate structured as showed in bodyStructure.",
@@ -86,23 +61,34 @@ function validateGetRequest(req, res) {
     },
     repository: "https://github.com/EMBL-EBI-SUBS/json-schema-validator"
   });
-}
+});
 
-function prototypePostRequest(req, res) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.mapped() });
-  } else {
-    let errors;
-    try {
-      errors = validate(req.body.schemas, req.body.rootSchemaId, req.body.entity);
-      return res.json(errors || []);
-    } catch(err) {
-      logger.log("error", err);
-      return res.status(500).send(new AppError(err.message));
+app.post("/prototype", [
+    check("schemas", "Required and must be a non empty array.").isArray().not().isEmpty(),
+    check("rootSchemaId", "Required.").isURL(),
+    check("entity", "Required.").exists()
+  ], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.mapped() });
+    } else {
+      logger.log("debug", "Received POST request.");
+      let errors;
+      try {
+        errors = validate(req.body.schemas, req.body.rootSchemaId, req.body.entity);
+        return res.json(errors || []);
+      } catch(err) {
+        logger.log("error", err);
+        return res.status(500).send(new AppError(err.message));
+      }
     }
   }
-}
+);
+
+app.listen(port, () => {
+  logger.log("info", ` -- Started server on port ${port} --`);
+  if(argv.logPath) { logger.log("info", ` --> Log output: ${argv.logPath}`); }
+});
 
 // -- For monitoring purposes -- //
 const pidPath = argv.pidPath || "./server.pid";
