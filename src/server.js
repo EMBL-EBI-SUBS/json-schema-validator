@@ -65,7 +65,7 @@ app.get("/validate", (req, res) => {
 
 app.post("/prototype", [
     check("schemas", "Required and must be a non empty array.").isArray().not().isEmpty(),
-    check("rootSchemaId", "Required.").isURL(),
+    check("rootSchemaId", "Required.").exists(),
     check("entity", "Required.").exists()
   ], (req, res) => {
     const errors = validationResult(req);

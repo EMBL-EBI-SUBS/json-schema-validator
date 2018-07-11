@@ -145,7 +145,7 @@ The endpoint will expect the body to have the following structure:
 {
   "schemas": [],
   "entity": {},
-  "baseSchemaId": ""
+  "rootSchemaId": ""
 }
 ```
 **Example:** 
