@@ -1,6 +1,6 @@
 class AppError {
   constructor(errorString) {
-    this.error = errorString;
+    this.errors = errorString;
   }
 }
 

@@ -215,14 +215,36 @@ HTTP status code `200`
 Where *errors* is an array of error messages for a given input identified by its path on *dataPath*. There may be one or more error objects within the response array. An empty array represents a valid validation result.
 
 ### API Errors
-Sending malformed JSON or a body with either the schema or the submittable missing will result in an API error (the request will not reach the validation). API errors have the following structure:
+Sending malformed JSON or a body with either the schema or the submittable missing will result in an API error (the request will not reach the validation). 
 
-HTTP status code `400`
-```json
-{
-  "error": "Malformed JSON please check your request body."
-}
-```
+- When sending malformed JSON:
+
+  HTTP status code `400` - Bad Request
+  ```js
+  {
+    "errors": "Malformed JSON please check your request body."
+  }
+  ```
+- When any of the required body values is missing:
+
+  HTTP status code `422` - Unprocessable Entity
+  ```js
+  {
+    "errors": {
+      "schema": {
+        "location": "body",
+        "param": "schema",
+        "msg": "Required."
+      },
+      "object": {
+        "location": "body",
+        "param": "object",
+        "msg": "Required."
+      }
+    }
+  }
+  ```
+
 ## Custom keywords
 The AJV library supports the implementation of custom json schema keywords to address validation scenarios that go beyond what json schema can handle.
 This validator has two custom keywords implemented, `isChildTermOf` and `isValidTerm`.

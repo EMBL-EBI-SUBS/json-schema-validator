@@ -23,11 +23,11 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     let appError = new AppError("Received malformed JSON.");
-    logger.log("info", appError.error);
+    logger.log("info", appError.errors);
     res.status(400).send(appError);
   } else {
     let appError = new AppError(err.message);
-    logger.log("error", appError.error);
+    logger.log("error", appError.errors);
     res.status(err.status).send(appError);
   }
 });
