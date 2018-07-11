@@ -1,10 +1,9 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const logger = require("./winston");
-const runValidation = require("./validator");
+const runValidation = require("./validation/validator");
 const AppError = require("./model/application-error");
 const { check, validationResult } = require("express-validator/check");
-const validate = require("./validator-prototype");
+const { handleValidation } = require("./validation/validation-handler");
 
 const argv = require("yargs").argv;
 const npid = require("npid");
@@ -12,7 +11,7 @@ const npid = require("npid");
 const app = express();
 const port = process.env.PORT || 3020;
 
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -45,8 +44,9 @@ app.post("/validate", [
     runValidation(req.body.schema, req.body.object).then((output) => {
       logger.log("silly", "Sent validation results.");
       res.status(200).send(output);
-    }).catch((error) => {
-      res.status(500).send(error);
+    }).catch((err) => {
+      logger.log("error", err.message);
+      res.status(500).send(new AppError(err.message));
     });
   }
 });
@@ -65,7 +65,7 @@ app.get("/validate", (req, res) => {
 
 app.post("/prototype", [
     check("schemas", "Required and must be a non empty array.").isArray().not().isEmpty(),
-    check("rootSchemaId", "Required.").exists(),
+    check("rootSchemaId", "Required.").optional(),
     check("entity", "Required.").exists()
   ], (req, res) => {
     const errors = validationResult(req);
@@ -73,9 +73,8 @@ app.post("/prototype", [
       return res.status(422).json({ errors: errors.mapped() });
     } else {
       logger.log("debug", "Received POST request.");
-      let errors;
       try {
-        errors = validate(req.body.schemas, req.body.rootSchemaId, req.body.entity);
+        let errors = handleValidation(req.body.schemas, req.body.entity, req.body.rootSchemaId);
         return res.json(errors || []);
       } catch(err) {
         logger.log("error", err);
@@ -84,6 +83,19 @@ app.post("/prototype", [
     }
   }
 );
+
+app.get("/prototype", (req, res) => {
+  logger.log("silly", "Received GET request.");
+  res.send({
+    message: "This is the Submissions JSON Schema Validator. Please POST to this endpoint the schema and object to validate structured as showed in bodyStructure.",
+    bodyStructure: {
+      schemas: [],
+      rootSchemaId: "",
+      entity: {}
+    },
+    repository: "https://github.com/EMBL-EBI-SUBS/json-schema-validator"
+  });
+});
 
 app.listen(port, () => {
   logger.log("info", ` -- Started server on port ${port} --`);

@@ -1,9 +1,9 @@
 let Ajv = require("ajv");
-const logger = require("./winston");
-let IsChildTermOf = require("./custom/ischildtermof");
-let IsValidTerm = require("./custom/isvalidterm");
-const ValidationError = require("./model/validation-error");
-const AppError = require("./model/application-error");
+const logger = require("../winston");
+let IsChildTermOf = require("../custom/ischildtermof");
+let IsValidTerm = require("../custom/isvalidterm");
+const ValidationError = require("../model/validation-error");
+const AppError = require("../model/application-error");
 
 let ajv = new Ajv({allErrors: true});
 let isChildTermOf = new IsChildTermOf(ajv);
