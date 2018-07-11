@@ -1,5 +1,5 @@
 const fs = require("fs");
-const protoValidate = require("../src/validator-prototype");
+const protoValidate = require("../src/validation/validator-prototype");
 
 test("Base schema and definitions schema test WITH erros", () => {
     let baseSchema = fs.readFileSync("examples/schemas/references/base-sample-schema.json");
@@ -10,7 +10,6 @@ test("Base schema and definitions schema test WITH erros", () => {
 
     let errors = protoValidate(
         [jsonBaseSchema, jsonDefinitionsSchema], 
-        jsonBaseSchema.$id, 
         {
             alias: "abc",
             taxonId: 9606,
@@ -19,7 +18,9 @@ test("Base schema and definitions schema test WITH erros", () => {
                 accession: "def123",
                 relationshipNature: ""
             }]
-        });
+        },
+        jsonBaseSchema.$id
+    );
 
     expect(errors).toBeDefined();
     expect(errors[0].schemaPath).toBe("definitions-schema.json#/definitions/sampleRelationships/items/properties/relationshipNature/enum");
@@ -33,8 +34,7 @@ test("Base schema and definitions schema test WITHOUT errors", () => {
     let jsonDefinitionsSchema = JSON.parse(definitionsSchema);
 
     let errors = protoValidate(
-        [jsonBaseSchema, jsonDefinitionsSchema], 
-        jsonBaseSchema.$id, 
+        [jsonBaseSchema, jsonDefinitionsSchema],
         {
             alias: "abc",
             taxonId: 9606,
@@ -43,7 +43,9 @@ test("Base schema and definitions schema test WITHOUT errors", () => {
                 accession: "def123",
                 relationshipNature: "derived from"
             }]
-        });
+        },
+        jsonBaseSchema.$id
+    );
 
     expect(errors).toBeNull();
 });
@@ -60,7 +62,6 @@ test("ML schema -> base schema -> definitions schema test", () => {
 
     let errors = protoValidate(
         [jsonMLSchema, jsonBaseSchema, jsonDefinitionsSchema], 
-        jsonMLSchema.$id, 
         {
             alias: "abc",
             taxonId: 9606,
@@ -69,7 +70,9 @@ test("ML schema -> base schema -> definitions schema test", () => {
                 Organism: [{value: "Homo sapiens"}],
                 "Organism part": [{}]
             }
-        });
+        },
+        jsonMLSchema.$id
+    );
 
     expect(errors[0].schemaPath).toBe("definitions-schema.json#/definitions/attributes_structure/items/required");
 });

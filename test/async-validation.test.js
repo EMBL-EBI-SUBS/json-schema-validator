@@ -1,5 +1,5 @@
 const fs = require("fs");
-const runValidation = require("../src/validator");
+const runValidation = require("../src/validation/validator");
 
 test(" -> isChildTermOf Schema", () => {
   let inputSchema = fs.readFileSync("examples/schemas/ischildterm-schema.json");

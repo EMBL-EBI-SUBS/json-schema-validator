@@ -1,5 +1,5 @@
 const fs = require("fs");
-const runValidation = require("../src/validator");
+const runValidation = require("../src/validation/validator");
 
 test("Empty Schema (empty object)", () => {
   return runValidation({}, {}).then( (data) => {
