@@ -189,13 +189,13 @@ The endpoint will expect the body to have the following structure:
 Response with no validation errors:
 
 HTTP status code `200`
-```json
+```js
 []
 ```
 An example of a validation response with errors:
 
 HTTP status code `200`
-```json
+```js
 [
   {
     "errors": [
