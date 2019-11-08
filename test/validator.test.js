@@ -16,6 +16,7 @@ test("Attributes Schema", () => {
   let jsonObj = JSON.parse(inputObj);
 
   return runValidation(jsonSchema, jsonObj).then( (data) => {
+    console.log(JSON.stringify(data));
     expect(data).toBeDefined();
     expect(data.length).toBe(1);
     expect(data[0].errors.length).toBe(1);
