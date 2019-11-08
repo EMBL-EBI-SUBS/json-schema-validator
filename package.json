@@ -24,7 +24,7 @@
   "dependencies": {
     "ajv": "^6.5.5",
     "body-parser": "^1.18.3",
-    "elixir-jsonschema-validator": "^1.4.2",
+    "elixir-jsonschema-validator": "github:elixir-europe/json-schema-validator#task/keyword-classes",
     "event-stream": "3.3.4",
     "express": "^4.16.4",
     "npid": "^0.4.0",
