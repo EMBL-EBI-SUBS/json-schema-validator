@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/EMBL-EBI-SUBS/json-schema-validator.svg?branch=master)](https://travis-ci.org/EMBL-EBI-SUBS/json-schema-validator) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/7fbabc981e294249a9a0967965418058)](https://www.codacy.com/app/fpenim/json-schema-validator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EMBL-EBI-SUBS/json-schema-validator&amp;utm_campaign=Badge_Grade)
 [![tested with jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
 
-This repository contains a [JSON Schema](http://json-schema.org/) validator for the EMBL-EBI Submissions Project. This validator runs as a standalone node server that receives validation requests and gives back it's results.
-The validation is done using the [AJV](https://github.com/epoberezkin/ajv) library version ^6.0.0 that fully supports the JSON Schema **draft-07**.
+This repository contains a [JSON Schema](http://json-schema.org/) validator service for the EMBL-EBI Submissions Project. This service runs as a standalone node server that receives validation requests and gives back it's results.
+The validation is done using the [Elixir JSON Validator](https://github.com/elixir-europe/json-schema-validator) library.
 
 Deployed for tests purposes on heroku: https://subs-json-schema-validator.herokuapp.com/validate
 
@@ -176,70 +176,5 @@ HTTP status code `400`
   "error": "Malformed JSON please check your request body."
 }
 ```
-## Custom keywords
-The AJV library supports the implementation of custom json schema keywords to address validation scenarios that go beyond what json schema can handle.
-This validator has two custom keywords implemented, `isChildTermOf` and `isValidTerm`.
-
-### isChildTermOf
-This custom keyword *evaluates if an ontology term is child of other*. This keyword is applied to a string (url) and **passes validation if the term is a child of the term defined in the schema**.
-The keyword requires the **parent term** and the **ontology id**, both of which should exist in [OLS - Ontology Lookup Service](https://www.ebi.ac.uk/ols).
-
-This keyword works by doing an asynchronous call to the [OLS API](https://www.ebi.ac.uk/ols/api/) that will respond with the required information to know if a given term is child of another. 
-Being an async validation step, whenever used in a schema, the schema must have the flag: `"$async": true` in its object root.
-
-#### Usage
-Schema:
-```js
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$async": true,
-  "properties": {
-    "term": { 
-      "type": "string", 
-      "format": "uri",
-      "isChildTermOf": {
-        "parentTerm": "http://purl.obolibrary.org/obo/PATO_0000047",
-        "ontologyId": "pato"
-      } 
-    }
-  }
-}
-```
-JSON object:
-```js
-{
-  "term": "http://purl.obolibrary.org/obo/PATO_0000383"
-}
-```
-
-### isValidTerm
-This custom keyword *evaluates if a given ontology term url exists in OLS* ([Ontology Lookup Service](https://www.ebi.ac.uk/ols)). It is applied to a string (url) and **passes validation if the term exists in OLS**. It can be aplied to any string defined in the schema.
-
-This keyword works by doing an asynchronous call to the [OLS API](https://www.ebi.ac.uk/ols/api/) that will respond with the required information to determine if the term exists in OLS or not. 
-Being an async validation step, whenever used in a schema, the schema must have the flag: `"$async": true` in its object root.
-
-#### Usage
-Schema:
-```js
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$async": true,
-
-  "properties": {
-    "url": { 
-      "type": "string", 
-      "format": "uri",
-      "isValidTerm": true 
-    } 
-  }
-}
-```
-JSON object:
-```js
-{
-  "url": "http://purl.obolibrary.org/obo/PATO_0000383"
-}
-```
-
 ## License
  For more details about licensing see the [LICENSE](LICENSE.md).
