@@ -22,7 +22,6 @@
   "author": "EMBL-EBI-SUBS, fpenim",
   "license": "Apache-2.0",
   "dependencies": {
-    "ajv": "^6.5.5",
     "body-parser": "^1.18.3",
     "elixir-jsonschema-validator": "github:elixir-europe/json-schema-validator#task/keyword-classes",
     "event-stream": "3.3.4",
