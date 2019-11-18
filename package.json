@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "body-parser": "^1.18.3",
-    "elixir-jsonschema-validator": "github:elixir-europe/json-schema-validator#task/keyword-classes",
+    "elixir-jsonschema-validator": "github:elixir-europe/json-schema-validator#task/keyword-classes-pre-ts",
     "event-stream": "3.3.4",
     "express": "^4.16.4",
     "npid": "^0.4.0",
