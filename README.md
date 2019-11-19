@@ -12,8 +12,6 @@ Deployed for tests purposes on heroku: https://subs-json-schema-validator.heroku
 
 - [Validation API](README.md#validation-api)
 
-- [Custom keywords](README.md#custom-keywords)
-
 - [License](README.md#license)
 
 ## Getting Started
