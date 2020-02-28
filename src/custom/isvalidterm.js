@@ -32,7 +32,7 @@ module.exports = function isValidTerm(ajv) {
           if (jsonBody["_embedded"]) {
             let numFound = jsonBody["_embedded"]["terms"].length;
 
-            if (numFound === 1) {
+            if (numFound > 0) {
               logger.log("debug", "Found 1 match!");
               resolve(true);
             } else if (numFound === 0) {
