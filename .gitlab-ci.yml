@@ -19,12 +19,14 @@ build_docker_image:
     - docker logout ${CI_REGISTRY}
 
 hx-production:
+  image: dtzar/helm-kubectl
   stage: deploy
   script:
      - sed -i s#%DOCKER_IMAGE%#$CI_REGISTRY_IMAGE\:0.0.1#g k8s-deployment.yaml
      - export KUBECONFIG=/home/gitlab-runner/.kube/hx-wp-webadmin-01-team-admin &&  kubectl apply -f k8s-deployment.yaml
 
 hh-production:
+  image: dtzar/helm-kubectl
   stage: deploy
   script:
      - sed -i s#%DOCKER_IMAGE%#$CI_REGISTRY_IMAGE\:0.0.1#g k8s-deployment.yaml
